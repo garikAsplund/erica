@@ -59,7 +59,7 @@
 	$: $calendarOpen = $open;
 </script>
 
-<div class="fixed flex flex-col items-center w-full gap-3 bottom-1/4">
+<div class="fixed flex flex-col items-center w-full gap-3 bottom-1/4 mb-4">
 	<div>
 		{#if !dateSelected}
 			<span use:melt={$label}>Click to select a time to meet</span>

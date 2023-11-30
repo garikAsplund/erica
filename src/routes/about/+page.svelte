@@ -2,8 +2,8 @@
 </script>
 
 <main class="flex flex-col items-center justify-center ">
-	<section class="w-2/3 space-y-4">
-		<h1 class="p-8 text-5xl text-center">About Me</h1>
+	<section class="w-2/3 space-y-4 mb-36">
+		<h1 class="p-8 text-5xl text-center">About</h1>
 		<p >
 			Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nullam euismod, nunc id aliquam
 			aliquet, nisl nunc ultricies nunc, nec aliquam nunc nunc nec nunc. Sed vitae nunc nec nunc
