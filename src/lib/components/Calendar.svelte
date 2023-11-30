@@ -9,6 +9,7 @@
 		getLocalTimeZone,
 		getDayOfWeek
 	} from '@internationalized/date';
+  import { calendarOpen } from '$lib/store';
 
 	let dateSelected: boolean = false;
 	let selectedTime: string = 'Please select a time';
@@ -54,6 +55,8 @@
 			return next;
 		}
 	});
+
+	$: $calendarOpen = $open;
 </script>
 
 <div class="fixed flex flex-col items-center w-full gap-3 bottom-1/4">
@@ -68,7 +71,7 @@
 		</div>
 	</div>
 	{#if $open}
-		<div transition:fade={{ duration: 400 }} use:melt={$content} class="scale-125">
+		<div transition:fade={{ duration: 400 }} use:melt={$content} class="scale-125" on:ended={() => !$calendarOpen} >
 			<div use:melt={$calendar}>
 				<header>
 					<button use:melt={$prevButton}>
