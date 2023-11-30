@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { createDatePicker, createToggleGroup, melt } from '@melt-ui/svelte';
-	import { ChevronRight, ChevronLeft, Calendar, Clock10 } from 'lucide-svelte';
+	import { ChevronRight, ChevronLeft, CalendarDays, Clock10 } from 'lucide-svelte';
 	import { fade, blur } from 'svelte/transition';
 	import {
 		CalendarDateTime,
@@ -50,7 +50,7 @@
 			return !(getDayOfWeek(date, 'en') === 1 || getDayOfWeek(date, 'en') === 2);
 		},
 		onValueChange: ({ curr, next }) => {
-			dateSelected = true;
+			next ? dateSelected = true : dateSelected = false;
 			return next;
 		}
 	});
@@ -63,7 +63,7 @@
 		{/if}
 		<div class="button-container">
 			<button use:melt={$trigger}>
-				<Calendar size={32} />
+				<CalendarDays size={32} />
 			</button>
 		</div>
 	</div>
@@ -120,7 +120,7 @@
 				class="flex items-center justify-center data-[orientation='vertical']:flex-col"
 				aria-label="Text alignment"
 			>
-      <Clock10 />
+				<Clock10 />
 				<button class="toggle-item" use:melt={$item('10 a.m.')} aria-label="10 a.m.">
 					10 a.m.
 				</button>
@@ -137,9 +137,15 @@
 		</div>
 	{/if}
 </div>
-	{#if dateSelected}
 
-<div use:melt={$segment} class="flex justify-center m-8 text-2xl text-center">
+{#if !dateSelected && $open && selectedTime !== 'Please select a time'}
+	<div class="flex justify-center m-8 text-2xl text-center">
+		<div in:blur={{ duration: 500 }}>Please select a date</div>
+	</div>
+{/if}
+
+{#if dateSelected}
+	<div class="flex justify-center m-8 text-2xl text-center">
 		<div transition:blur={{ duration: 500 }}>
 			{#each $segmentContents as seg}
 				{seg.value}
@@ -147,8 +153,8 @@
 			<br />
 			{selectedTime}
 		</div>
-</div>
-	{/if}
+	</div>
+{/if}
 
 {#if selectedTime !== 'Please select a time' && dateSelected}
 	<div class="flex justify-center m-8 text-2xl text-center" transition:blur={{ duration: 500 }}>
@@ -158,19 +164,14 @@
 	</div>
 {/if}
 
-<div class="hidden">
-	{#each $segmentContents as seg}
-		{seg.value}
-	{/each}
-</div>
-
 <style lang="postcss">
 	.button-container {
 		@apply mt-4 flex w-full items-center justify-center;
 	}
 
 	[data-melt-popover-content] {
-		@apply z-10 min-w-[320px] rounded-lg bg-neutral-900 shadow-sm;
+		@apply z-10 rounded-lg bg-neutral-900 shadow-sm;
+		@apply md:min-w-[320px]; /* Apply styles only for medium screens and larger */
 	}
 
 	[data-melt-popover-trigger] {
