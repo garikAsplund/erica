@@ -1,6 +1,10 @@
 <script lang="ts">
 	import Calendar from '$lib/components/Calendar.svelte';
 	import { calendarOpen } from '$lib/store';
+
+	export let data;
+
+	console.log({data});
 </script>
 
 <div class="flex flex-col items-center justify-center space-y-6 h-2/3" class:invisible={$calendarOpen}>

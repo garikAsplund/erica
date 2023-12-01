@@ -9,13 +9,18 @@
 		getLocalTimeZone,
 		getDayOfWeek
 	} from '@internationalized/date';
-  import { calendarOpen } from '$lib/store';
+	import { calendarOpen } from '$lib/store';
+	import { dbController } from '$lib/supabase';
+	import { page } from '$app/stores';
 
 	let dateSelected: boolean = false;
 	let selectedTime: string = 'Please select a time';
+	let selectedDate: string;
+	let bookedTimes: string[] = [];
+	let disabledByTime: boolean = false;
 
 	const {
-		elements: { root, item }
+		elements: { root, item },
 	} = createToggleGroup({
 		type: 'single',
 		onValueChange: ({ curr, next }) => {
@@ -51,12 +56,41 @@
 			return !(getDayOfWeek(date, 'en') === 1 || getDayOfWeek(date, 'en') === 2);
 		},
 		onValueChange: ({ curr, next }) => {
-			next ? dateSelected = true : dateSelected = false;
+			selectedDate = next.toString();
+			bookedTimes = timesBookedOnDay(selectedDate);
+			disabledByTime = bookedTimes.includes('10 a.m.');
+			next ? (dateSelected = true) : (dateSelected = false);
 			return next;
 		}
 	});
 
 	$: $calendarOpen = $open;
+	// $: disabledByTime = bookedTimes.includes('10 a.m.');
+
+	function book() {
+		dbController.postAppointment(selectedDate, selectedTime);
+	}
+
+	const bookedDays = $page.data.booked.map((slot) => {
+		const { day, time } = slot;
+		return { day, time };
+	});
+
+	console.log({ bookedDays });
+
+	function isDayBooked(selectedDate) {
+		return bookedDays.some(slot => slot.day === selectedDate);
+	}
+
+	function isTimeBooked(selectedTime) {
+		return bookedDays.some(slot => slot.time === selectedTime);
+	}
+
+	function timesBookedOnDay(selectedDate) {
+		return bookedDays.filter(slot => slot.day === selectedDate).map(slot => slot.time);
+	}
+
+	console.log($item('10 a.m.').disabled);
 </script>
 
 <div class="fixed flex flex-col items-center w-full gap-3 bottom-1/4 mb-4">
@@ -71,7 +105,12 @@
 		</div>
 	</div>
 	{#if $open}
-		<div transition:fade={{ duration: 400 }} use:melt={$content} class="scale-125" on:ended={() => !$calendarOpen} >
+		<div
+			transition:fade={{ duration: 400 }}
+			use:melt={$content}
+			class="scale-125"
+			on:ended={() => !$calendarOpen}
+		>
 			<div use:melt={$calendar}>
 				<header>
 					<button use:melt={$prevButton}>
@@ -121,10 +160,10 @@
 			<div
 				use:melt={$root}
 				class="flex items-center justify-center data-[orientation='vertical']:flex-col"
-				aria-label="Text alignment"
+				aria-label="Available times"
 			>
 				<Clock10 />
-				<button class="toggle-item" use:melt={$item('10 a.m.')} aria-label="10 a.m.">
+				<button class="toggle-item" disabled={bookedTimes.includes('10 a.m.')} use:melt={$item('10 a.m.')} aria-label="10 a.m.">
 					10 a.m.
 				</button>
 				<button class="toggle-item" use:melt={$item('11 a.m.')} aria-label="11 a.m.">
@@ -161,7 +200,10 @@
 
 {#if selectedTime !== 'Please select a time' && dateSelected}
 	<div class="flex justify-center m-8 text-2xl text-center" transition:blur={{ duration: 500 }}>
-		<button class="px-4 py-2 font-bold text-gray-200 border border-teal-400 hover:bg-teal-100/10">
+		<button
+			class="px-4 py-2 font-bold text-gray-200 border border-teal-400 hover:bg-teal-100/10"
+			on:click={book}
+		>
 			Book
 		</button>
 	</div>
