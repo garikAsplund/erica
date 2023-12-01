@@ -44,6 +44,9 @@
 		isDateDisabled: (date) => {
 			return !(getDayOfWeek(date, 'en') === 1 || getDayOfWeek(date, 'en') === 2);
 		},
+		isDateUnavailable: (date) => {
+			return bookedDays.map(thing => thing.day).filter(day => day === date.toString()).length === 4;
+		},
 		onValueChange: ({ curr, next }) => {
 			selectedDate = next.toString();
 			bookedTimes = timesBookedOnDay(selectedDate);
