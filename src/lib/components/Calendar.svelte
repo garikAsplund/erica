@@ -17,17 +17,6 @@
 	let selectedTime: string = 'Please select a time';
 	let selectedDate: string;
 	let bookedTimes: string[] = [];
-	let disabledByTime: boolean = false;
-
-	const {
-		elements: { root, item },
-	} = createToggleGroup({
-		type: 'single',
-		onValueChange: ({ curr, next }) => {
-			selectedTime = next ?? 'Please select a time';
-			return next;
-		}
-	});
 
 	const todaysDate: CalendarDate = today(getLocalTimeZone());
 
@@ -58,14 +47,14 @@
 		onValueChange: ({ curr, next }) => {
 			selectedDate = next.toString();
 			bookedTimes = timesBookedOnDay(selectedDate);
-			disabledByTime = bookedTimes.includes('10 a.m.');
+			console.log({bookedTimes});
+			bookedTimes.includes(selectedTime) ? (selectedTime = 'Please select a time') : null;
 			next ? (dateSelected = true) : (dateSelected = false);
 			return next;
 		}
 	});
 
 	$: $calendarOpen = $open;
-	// $: disabledByTime = bookedTimes.includes('10 a.m.');
 
 	function book() {
 		dbController.postAppointment(selectedDate, selectedTime);
@@ -78,19 +67,9 @@
 
 	console.log({ bookedDays });
 
-	function isDayBooked(selectedDate) {
-		return bookedDays.some(slot => slot.day === selectedDate);
-	}
-
-	function isTimeBooked(selectedTime) {
-		return bookedDays.some(slot => slot.time === selectedTime);
-	}
-
 	function timesBookedOnDay(selectedDate) {
-		return bookedDays.filter(slot => slot.day === selectedDate).map(slot => slot.time);
+		return bookedDays.filter((slot) => slot.day === selectedDate).map((slot) => slot.time);
 	}
-
-	console.log($item('10 a.m.').disabled);
 </script>
 
 <div class="fixed flex flex-col items-center w-full gap-3 bottom-1/4 mb-4">
@@ -157,24 +136,27 @@
 					{/each}
 				</div>
 			</div>
-			<div
-				use:melt={$root}
-				class="flex items-center justify-center data-[orientation='vertical']:flex-col"
-				aria-label="Available times"
-			>
+			<div class="flex items-center justify-center" aria-label="Available times">
 				<Clock10 />
-				<button class="toggle-item" disabled={bookedTimes.includes('10 a.m.')} use:melt={$item('10 a.m.')} aria-label="10 a.m.">
-					10 a.m.
-				</button>
-				<button class="toggle-item" use:melt={$item('11 a.m.')} aria-label="11 a.m.">
-					11 a.m.
-				</button>
-				<button class="toggle-item" use:melt={$item('12 p.m.')} aria-label="12 p.m.">
-					12 p.m.
-				</button>
-				<button class="toggle-item" use:melt={$item('1 p.m.')} aria-label="1 p.m.'">
-					1 p.m.
-				</button>
+				<form class="flex items-center justify-center">
+					{#each ['10 a.m.', '11 a.m.', '12 p.m.', '1 p.m.'] as option}
+						<input
+							type="radio"
+							id={option}
+							name="time"
+							value={option}
+							class="hidden"
+							disabled={bookedTimes.includes(option)}
+							bind:group={selectedTime}
+						/>
+						<label
+							for={option}
+							class={`toggle-item cursor-pointer ${bookedTimes.includes(option) ? ' !text-black hover:!bg-black' : 'bg-black text-teal-500'}`}							
+							class:cursor-not-allowed={bookedTimes.includes(option)}
+							data-state={selectedTime === option ? 'on' : 'off'}>{option}</label
+						>
+					{/each}
+				</form>
 			</div>
 		</div>
 	{/if}
@@ -338,6 +320,12 @@
 
 		&:focus {
 			z-index: 10;
+		}
+
+		&:disabled {
+			cursor: not-allowed;
+			font-size: xx-large;
+			color: invisible;
 		}
 	}
 
