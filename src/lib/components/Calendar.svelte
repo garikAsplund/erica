@@ -17,6 +17,7 @@
 	let selectedTime: string = 'Please select a time';
 	let selectedDate: string;
 	let bookedTimes: string[] = [];
+	let firstTime: boolean = true;
 
 	const todaysDate: CalendarDate = today(getLocalTimeZone());
 
@@ -45,14 +46,20 @@
 			return !(getDayOfWeek(date, 'en') === 1 || getDayOfWeek(date, 'en') === 2);
 		},
 		isDateUnavailable: (date) => {
-			return bookedDays.map(thing => thing.day).filter(day => day === date.toString()).length === 4;
+			return (
+				bookedDays.map((thing) => thing.day).filter((day) => day === date.toString()).length === 4
+			);
 		},
 		onValueChange: ({ curr, next }) => {
 			selectedDate = next.toString();
 			bookedTimes = timesBookedOnDay(selectedDate);
-			console.log({bookedTimes});
+			console.log({ bookedTimes });
+			if (selectedTime !== 'Please select a time') {
+				setTimeout(() => $open = false, 500);
+			}
 			bookedTimes.includes(selectedTime) ? (selectedTime = 'Please select a time') : null;
 			next ? (dateSelected = true) : (dateSelected = false);
+			``;
 			return next;
 		}
 	});
@@ -68,16 +75,14 @@
 		return { day, time };
 	});
 
-	console.log({ bookedDays });
-
 	function timesBookedOnDay(selectedDate) {
 		return bookedDays.filter((slot) => slot.day === selectedDate).map((slot) => slot.time);
 	}
 </script>
 
-<div class="fixed flex flex-col items-center w-full gap-3 bottom-1/4 mb-4">
+<div class=" flex flex-col items-center w-full gap-3 bottom-1/4 mb-4">
 	<div>
-		{#if !dateSelected}
+		{#if !dateSelected && !$open}
 			<span use:melt={$label}>Click to select a time to meet</span>
 		{/if}
 		<div class="button-container">
@@ -154,8 +159,15 @@
 						/>
 						<label
 							for={option}
-							class={`toggle-item cursor-pointer ${bookedTimes.includes(option) ? ' !text-black hover:!bg-black' : 'bg-black text-teal-500'}`}							
+							class={`toggle-item cursor-pointer ${
+								bookedTimes.includes(option)
+									? ' !text-black hover:!bg-black'
+									: 'bg-black text-teal-500'
+							}`}
 							class:cursor-not-allowed={bookedTimes.includes(option)}
+							on:click={() => {
+								if (selectedDate) setTimeout(() => {$open = false}, 500);
+							}}
 							data-state={selectedTime === option ? 'on' : 'off'}>{option}</label
 						>
 					{/each}
@@ -172,7 +184,7 @@
 {/if}
 
 {#if dateSelected}
-	<div class="flex justify-center m-8 text-2xl text-center">
+	<div class="flex flex-col space-y-6 justify-center items-center m-8 text-2xl text-center">
 		<div transition:blur={{ duration: 500 }}>
 			{#each $segmentContents as seg}
 				{seg.value}
@@ -180,18 +192,21 @@
 			<br />
 			{selectedTime}
 		</div>
+		<form class="flex flex-col justify-center space-y-4 items-center">
+			<label>Briefly explain what you want to work on</label>
+			<textarea name="sessionDetails" cols="40" rows="3" class="bg-transparent border-2 border-teal-500 text-sm" ></textarea>
+		</form>
 	</div>
-{/if}
-
-{#if selectedTime !== 'Please select a time' && dateSelected}
-	<div class="flex justify-center m-8 text-2xl text-center" transition:blur={{ duration: 500 }}>
-		<button
-			class="px-4 py-2 font-bold text-gray-200 border border-teal-400 hover:bg-teal-100/10"
-			on:click={book}
-		>
-			Book
-		</button>
-	</div>
+	{#if selectedTime !== 'Please select a time'}
+		<div class="flex justify-center m-8 text-2xl text-center" transition:blur={{ duration: 500 }}>
+			<button
+				class="px-4 mb-24 py-2 font-bold text-gray-200 border border-teal-400 hover:bg-teal-100/10"
+				on:click={book}
+			>
+				Book
+			</button>
+		</div>
+	{/if}
 {/if}
 
 <style lang="postcss">
