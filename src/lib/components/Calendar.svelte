@@ -18,6 +18,7 @@
 	let selectedDate: string;
 	let bookedTimes: string[] = [];
 	let firstTime: boolean = true;
+	let sessionNotes: string = "";
 
 	const todaysDate: CalendarDate = today(getLocalTimeZone());
 
@@ -67,7 +68,7 @@
 	$: $calendarOpen = $open;
 
 	function book() {
-		dbController.postAppointment(selectedDate, selectedTime);
+		dbController.postAppointment(selectedDate, selectedTime, sessionNotes);
 	}
 
 	const bookedDays = $page.data.booked.map((slot) => {
@@ -194,7 +195,7 @@
 		</div>
 		<form class="flex flex-col justify-center space-y-4 items-center">
 			<label>Briefly explain what you want to work on</label>
-			<textarea name="sessionDetails" cols="40" rows="3" class="bg-transparent border-2 border-teal-500 text-sm" ></textarea>
+			<textarea name="sessionDetails" bind:value={sessionNotes} cols="40" rows="3" class="bg-transparent border-2 border-teal-500 text-sm" ></textarea>
 		</form>
 	</div>
 	{#if selectedTime !== 'Please select a time'}

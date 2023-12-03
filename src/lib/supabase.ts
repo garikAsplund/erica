@@ -13,9 +13,9 @@ enum Times {
 }
 
 export const dbController = {
-	async postAppointment(day: string, time: Times) {
+	async postAppointment(day: string, time: Times, notes: string) {
 
-		const { data, error } = await supabase.from('appointments').insert({ day, time });
+		const { data, error } = await supabase.from('appointments').insert({ day, time, notes });
 
 		if (error) {
 			console.error('Error inserting data:', error);
